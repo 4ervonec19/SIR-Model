@@ -6,7 +6,7 @@ from matplotlib.ticker import FormatStrFormatter, FuncFormatter
 
 
 
-def SIR_model(vector, time, beta, gamma, population): #Инициализация функции
+def SIR_model(vector, time, beta, gamma, population): #Function -> Initialization of system od ODE's
 
     ds_dt = (-beta*vector[0]*vector[1])/(population)
     di_dt = (beta*vector[0]*vector[1])/(population) - gamma*vector[1]
@@ -16,7 +16,7 @@ def SIR_model(vector, time, beta, gamma, population): #Инициализаци�
 
 time = np.linspace(-50, 150, 400)
 population = 200000
-I0 = tf.random.truncated_normal(shape=(100,), mean=1.0, stddev=0.5)
+I0 = tf.random.truncated_normal(shape=(100,), mean=1.0, stddev=0.5) #Could be another ratios
 
 I0 = I0.numpy()
 R0 = 0
@@ -31,7 +31,7 @@ ax = figure.subplots()
 def formatOy(x, pos):
     return f"{x / 10000}"
 
-for i in range(len(I0)):
+for i in range(len(I0)):  #Plotting of different stochastic realizations
     S0 = population - I0[i] - R0
     starting_conditions = [S0, I0[i], R0]
     solve = odeint(SIR_model, starting_conditions, time, args=(beta, gamma, population))
