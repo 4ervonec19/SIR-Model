@@ -1,4 +1,6 @@
 #Mathematical epidemiology articles
+
+
 Couple of scientific notes were studied and there's presented some discussion.
 The first one tells us about SIR system of ODE's solutions which represents the spreading of pandemic in time.
 Using the SciPy and Runge-Kutta method we received the Infected Group population during the time by solving Cauchy problem for normal distribution
