@@ -1,4 +1,4 @@
-# Mathematical epidemiology articles
+# Mathematical epidemiology: Study notes
 
 
 Couple of scientific notes were studied and there's presented some discussion.
