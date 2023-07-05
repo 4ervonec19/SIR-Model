@@ -15,6 +15,6 @@ Acturally, Pandemic and Aware, Fair of Pandemic respectively. Unfortunately, aut
 
 ![](gr2.png)
 
-For sure, probability can't be greater than 1, but if we get some assumption, we may realize the similar trends of plotted lines.
+For sure, probability can't be greater than 1, but if we got some assumption, we might realize the similar trends of plotted lines.
 
 
