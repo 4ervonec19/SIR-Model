@@ -11,7 +11,7 @@ of initial conditions. As a result: red line is expected & blue variant are stoc
 The second one reveals the Markov Chains Approach in Interaction of Networks:
 Pandemic and Aware, Fair of it respectively. Unfortunately, authors haven't shown the scrips of simulation and just tried to build up the plots by solving the problem I created by myself. Here you may see both results
 
-![](Graph_2 (1).png)
+![](Graph_2(1).png)
 
 ![](gr2.png)
 
