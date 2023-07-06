@@ -24,4 +24,8 @@ revealed to more effective results than shown above
 
 ![](Nice_plot_bro.png)
 
+# Flatten result
+
+![](nice_plot_flatten.png)
+
 
