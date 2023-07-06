@@ -22,6 +22,6 @@ For sure, probability can't be greater than 1, but if we got some assumption, we
 Decision was modified by analyzing the article's text. New approach was considered, function markov_chain_approach was defined. Stochastic realization based on example from link: https://www.datacamp.com/tutorial/markov-chains-python-tutorial 
 revealed to more effective results than shown above
 
-![]()
+![](Nice_plot_bro.png)
 
 
