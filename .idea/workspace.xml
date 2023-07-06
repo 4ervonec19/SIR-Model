@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="00a8e688-bcae-490c-9feb-d37f7bfd1e35" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/nice_plot_flatten.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MMCA_in_Complex_Epidemic_networks.py" beforeDir="false" afterPath="$PROJECT_DIR$/MMCA_in_Complex_Epidemic_networks.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
