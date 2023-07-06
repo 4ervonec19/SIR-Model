@@ -12,7 +12,7 @@ beta_array = np.linspace(0, 1, 20)
 beta = 0.1
 gamma = 0.0
 
-amount_nodes = 500
+amount_nodes = 150
 time = 100
 
 distribution = nx.utils.powerlaw_sequence(amount_nodes, exponent=2.5, seed=None)
@@ -70,7 +70,7 @@ def markov_chain_approach(time, beta):
     for i in range(amount_nodes):
         p_ai_new = nodes_all[i]['probability_dict']['p_ai']
         p_as_new = nodes_all[i]['probability_dict']['p_as']
-        aware_array.append(p_ai_new + p_as_new)
+        aware_array.append(p_ai_new + p_as_new + 0.2)
 
     mean_value = statistics.mean(aware_array)
     return mean_value

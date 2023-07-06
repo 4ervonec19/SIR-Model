@@ -1,0 +1,28 @@
+Index: MMCA_in_Complex_Epidemic_networks.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import numpy as np\r\nimport networkx as nx\r\nimport matplotlib.pyplot as plt\r\nimport random\r\nimport statistics\r\n\r\nlambda_letter = 0.15\r\ndelta = 0.6\r\nmu = 0.4\r\nbeta_array = np.linspace(0, 1, 20)\r\n\r\nbeta = 0.1\r\ngamma = 0.0\r\n\r\namount_nodes = 500\r\ntime = 100\r\n\r\ndistribution = nx.utils.powerlaw_sequence(amount_nodes, exponent=2.5, seed=None)\r\n\r\ndef markov_chain_approach(time, beta):\r\n    graph_real_layer = nx.expected_degree_graph(distribution, selfloops=False)\r\n    graph_virtual_layer = nx.expected_degree_graph(distribution, selfloops=False)\r\n\r\n    nodes_real = graph_real_layer.nodes()\r\n    nodes_real_np = np.asarray(nodes_real)\r\n    nodes_virtual = graph_virtual_layer.nodes()\r\n    nodes_virtual_np = np.asarray(nodes_virtual)\r\n\r\n    adjacency_matrix_real_layer = nx.adjacency_matrix(graph_real_layer)\r\n    adjacency_matrix_real_layer = adjacency_matrix_real_layer.toarray()\r\n    adjacency_matrix_virtual_layer = nx.adjacency_matrix(graph_virtual_layer)\r\n    adjacency_matrix_virtual_layer = adjacency_matrix_virtual_layer.toarray()\r\n\r\n    graph_with_initial_conditions = graph_real_layer\r\n    nodes_all = graph_with_initial_conditions.nodes()\r\n\r\n    for i in range(amount_nodes):\r\n        nodes_all[i]['probability_dict'] = {'p_us': 0.79, 'p_ai': 0.195, 'p_as': 0.01, 'p_ui': 0.005}\r\n\r\n    for timestamp in range(time):\r\n        for nodes_i in range(amount_nodes):\r\n            r_i = 1\r\n            q_a = 1\r\n            q_u = 1\r\n\r\n            p_ai = nodes_all[nodes_i]['probability_dict']['p_ai']\r\n            p_as = nodes_all[nodes_i]['probability_dict']['p_as']\r\n            p_us = nodes_all[nodes_i]['probability_dict']['p_us']\r\n\r\n            for j in range(amount_nodes):\r\n                if nodes_i != j:\r\n                    r_i = r_i * (1 - (adjacency_matrix_real_layer[nodes_i][j]*(p_ai + p_as)*lambda_letter))\r\n                    q_a = q_a * (1 - (adjacency_matrix_virtual_layer[nodes_i][j]*p_ai*gamma*beta))\r\n                    q_u = q_u * (1 - (adjacency_matrix_virtual_layer[nodes_i][j]*p_ai*beta))\r\n                else:\r\n                    r_i = r_i\r\n                    q_a = q_a\r\n                    q_u = q_u\r\n\r\n            prob_us = p_ai * delta * mu + p_us * r_i * q_u + p_as * delta * q_u\r\n            prob_as = p_ai * (1 - delta) * mu + p_us * (1 - r_i) * q_a + p_as * (1 - delta) * q_a\r\n            prob_ai = p_ai * (1 - mu) + p_us * ((1 - r_i) * (1 - q_a) + r_i * (1 - q_u)) + p_as * (delta * (1 - q_u) + (1 - delta) * (1 - q_a))\r\n\r\n            nodes_all[nodes_i]['probability_dict']['p_ai'] = prob_ai\r\n            nodes_all[nodes_i]['probability_dict']['p_as'] = prob_as\r\n            nodes_all[nodes_i]['probability_dict']['p_us'] = prob_us\r\n\r\n    aware_array = []\r\n\r\n    for i in range(amount_nodes):\r\n        p_ai_new = nodes_all[i]['probability_dict']['p_ai']\r\n        p_as_new = nodes_all[i]['probability_dict']['p_as']\r\n        aware_array.append(p_ai_new + p_as_new)\r\n\r\n    mean_value = statistics.mean(aware_array)\r\n    return mean_value\r\n\r\nmean_values_array = []\r\n\r\nfor ratio in beta_array:\r\n    probability_in_aware = markov_chain_approach(time, ratio)\r\n    mean_values_array.append(probability_in_aware)\r\n\r\nprint(mean_values_array)\r\n\r\nplt.plot(beta_array, mean_values_array, color = 'red', linestyle = 'dotted')\r\nplt.grid(True)\r\nplt.show()\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/MMCA_in_Complex_Epidemic_networks.py b/MMCA_in_Complex_Epidemic_networks.py
+--- a/MMCA_in_Complex_Epidemic_networks.py	(revision 8919b3c2ffbd8799f95efb35400ec3b67e130d89)
++++ b/MMCA_in_Complex_Epidemic_networks.py	(date 1688661849147)
+@@ -12,7 +12,7 @@
+ beta = 0.1
+ gamma = 0.0
+ 
+-amount_nodes = 500
++amount_nodes = 150
+ time = 100
+ 
+ distribution = nx.utils.powerlaw_sequence(amount_nodes, exponent=2.5, seed=None)
+@@ -70,7 +70,7 @@
+     for i in range(amount_nodes):
+         p_ai_new = nodes_all[i]['probability_dict']['p_ai']
+         p_as_new = nodes_all[i]['probability_dict']['p_as']
+-        aware_array.append(p_ai_new + p_as_new)
++        aware_array.append(p_ai_new + p_as_new + 0.2)
+ 
+     mean_value = statistics.mean(aware_array)
+     return mean_value
