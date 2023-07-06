@@ -17,4 +17,11 @@ Acturally, Pandemic and Aware, Fair of Pandemic respectively. Unfortunately, aut
 
 For sure, probability can't be greater than 1, but if we got some assumption, we might realize the similar trends of plotted lines.
 
+# Update
+
+Decision was modified by analyzing the article's text. New approach was considered, function markov_chain_approach was defined. Stochastic realization based on example from link: https://www.datacamp.com/tutorial/markov-chains-python-tutorial 
+revealed to more effective results than shown above
+
+![]()
+
 
