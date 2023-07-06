@@ -1,148 +1,109 @@
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+import random
 import statistics
-
-
 
 lambda_letter = 0.15
 delta = 0.6
 mu = 0.4
 beta_array = np.linspace(0, 1, 20)
 
+beta = 0.1
 gamma = 0.0
-from_beta_mean_target = []
-from_beta_mean_target_s = []
 
+amount_nodes = 500
+time = 100
 
-distribution = nx.utils.powerlaw_sequence(100, exponent=2.5, seed=None)
-graph_real_layer = nx.expected_degree_graph(distribution, selfloops=False)
-graph_virtual_layer = nx.expected_degree_graph(distribution, selfloops=False)
+distribution = nx.utils.powerlaw_sequence(amount_nodes, exponent=2.5, seed=None)
 
-nodes_real = graph_real_layer.nodes()
-nodes_real_np = np.asarray(nodes_real)
-nodes_virtual = graph_virtual_layer.nodes()
-nodes_virtual_np = np.asarray(nodes_virtual)
+def markov_chain_approach(time, beta):
+    graph_real_layer = nx.expected_degree_graph(distribution, selfloops=False)
+    graph_virtual_layer = nx.expected_degree_graph(distribution, selfloops=False)
 
-np.random.shuffle(nodes_real_np)
-np.random.shuffle(nodes_virtual_np)
+    nodes_real = graph_real_layer.nodes()
+    nodes_real_np = np.asarray(nodes_real)
+    nodes_virtual = graph_virtual_layer.nodes()
+    nodes_virtual_np = np.asarray(nodes_virtual)
 
-initial_fraction_infected = 0.2
-initial_fraction_suspected = 0.8
+    adjacency_matrix_real_layer = nx.adjacency_matrix(graph_real_layer)
+    adjacency_matrix_real_layer = adjacency_matrix_real_layer.toarray()
+    adjacency_matrix_virtual_layer = nx.adjacency_matrix(graph_virtual_layer)
+    adjacency_matrix_virtual_layer = adjacency_matrix_virtual_layer.toarray()
 
-for i in range(len(nodes_real)):
-    nodes_real[nodes_real_np[i]]['Compartment'] = 'S'
+    graph_with_initial_conditions = graph_real_layer
+    nodes_all = graph_with_initial_conditions.nodes()
 
-break_point = initial_fraction_infected * len(nodes_real)
-count = 0
-for i in range(len(nodes_real_np)):
-    nodes_real[nodes_real_np[i]]['Compartment'] = 'I'
-    count += 1
-    if count == break_point:
-        break
+    for i in range(amount_nodes):
+        nodes_all[i]['probability_dict'] = {'p_us': 0.79, 'p_ai': 0.195, 'p_as': 0.01, 'p_ui': 0.005}
 
-for i in range(len(nodes_virtual)):
-    nodes_virtual[nodes_virtual_np[i]]['Compartment'] = 'U'
+    for timestamp in range(time):
+        for nodes_i in range(amount_nodes):
+            r_i = 1
+            q_a = 1
+            q_u = 1
 
-break_point = initial_fraction_infected * len(nodes_virtual)
-count = 0
-for i in range(len(nodes_virtual)):
-    nodes_virtual[nodes_virtual_np[i]]['Compartment'] = 'A'
-    count += 1
-    if count == break_point:
-        break
+            p_ai = nodes_all[nodes_i]['probability_dict']['p_ai']
+            p_as = nodes_all[nodes_i]['probability_dict']['p_as']
+            p_us = nodes_all[nodes_i]['probability_dict']['p_us']
 
-for i in range(len(nodes_real)):
-    if nodes_real[i]['Compartment'] == 'I' and nodes_virtual[i]['Compartment'] == 'A':
-        nodes_real[i]['AI_prob'] = 0.2 ** 2
-    else:
-        nodes_real[i]['AI_prob'] = 1 - 0.2 ** 2
+            for j in range(amount_nodes):
+                if nodes_i != j:
+                    r_i = r_i * (1 - (adjacency_matrix_real_layer[nodes_i][j]*(p_ai + p_as)*lambda_letter))
+                    q_a = q_a * (1 - (adjacency_matrix_virtual_layer[nodes_i][j]*p_ai*gamma*beta))
+                    q_u = q_u * (1 - (adjacency_matrix_virtual_layer[nodes_i][j]*p_ai*beta))
+                else:
+                    r_i = r_i
+                    q_a = q_a
+                    q_u = q_u
 
-    if nodes_virtual[i]['Compartment'] == 'A':
-        nodes_real[i]['A_prob'] = 0.2
-    else:
-        nodes_real[i]['A_prob'] = 0.8
+            prob_us = p_ai * delta * mu + p_us * r_i * q_u + p_as * delta * q_u
+            prob_as = p_ai * (1 - delta) * mu + p_us * (1 - r_i) * q_a + p_as * (1 - delta) * q_a
+            prob_ai = p_ai * (1 - mu) + p_us * ((1 - r_i) * (1 - q_a) + r_i * (1 - q_u)) + p_as * (delta * (1 - q_u) + (1 - delta) * (1 - q_a))
 
-    if nodes_real[i]['Compartment'] == 'S' and nodes_virtual[i]['Compartment'] == 'A':
-        nodes_real[i]['AS_prob'] = 0.2 * 0.8
-    else:
-        nodes_real[i]['AS_prob'] = 1 - 0.2 * 0.8
+            nodes_all[nodes_i]['probability_dict']['p_ai'] = prob_ai
+            nodes_all[nodes_i]['probability_dict']['p_as'] = prob_as
+            nodes_all[nodes_i]['probability_dict']['p_us'] = prob_us
 
-    if nodes_real[i]['Compartment'] == 'S' and nodes_virtual[i]['Compartment'] == 'U':
-        nodes_real[i]['US_prob'] = 0.2 * 0.8
-    else:
-        nodes_real[i]['US_prob'] = 1 - 0.2 * 0.8
+    aware_array = []
 
-# for i in range(len(nodes_real)):
-#     print(nodes_real[i]['AI_prob'], nodes_real[i]['A_prob'], sep='\t')
+    for i in range(amount_nodes):
+        p_ai_new = nodes_all[i]['probability_dict']['p_ai']
+        p_as_new = nodes_all[i]['probability_dict']['p_as']
+        aware_array.append(p_ai_new + p_as_new)
 
-adjacency_matrix = nx.adjacency_matrix(graph_real_layer, nodelist=nodes_real)
-adjacency_matrix = adjacency_matrix.toarray()
+    mean_value = statistics.mean(aware_array)
+    return mean_value
 
+mean_values_array = []
 
-for betas in range(len(beta_array)):
+for ratio in beta_array:
+    probability_in_aware = markov_chain_approach(time, ratio)
+    mean_values_array.append(probability_in_aware)
 
+print(mean_values_array)
 
-
-    for i in range(len(nodes_real)):
-        factor = [1, 1, 1]
-        for j in range(100):
-            factor[0] = (1 - adjacency_matrix[i][j]*nodes_real[i]['A_prob']*lambda_letter)*factor[0]
-            factor[1] = (1 - adjacency_matrix[i][j]*nodes_real[i]['AI_prob']*0.0)*factor[1]
-            factor[2] = (1 - adjacency_matrix[i][j]*nodes_real[i]['AI_prob']*beta_array[betas])*factor[2]
-            if j == 999:
-                nodes_real[i]['r_rate'] = factor[0]
-                nodes_real[i]['qa_rate'] = factor[1]
-                nodes_real[i]['qu_rate'] = factor[2]
-
-    # for i in range(len(nodes_real)):
-    #     print("{0:.2f}".format(nodes_real[i]['AI_prob']), "{0:.2f}".format(nodes_real[i]['A_prob']), "{0:.2f}".format(nodes_real[i]['AS_prob']),
-    #           "{0:.2f}".format(nodes_real[i]['US_prob']),
-    #           "{0:.2f}".format(nodes_real[i]['r_rate']),
-    #           "{0:.2f}".format(nodes_real[i]['qa_rate']),
-    #           "{0:.2f}".format(nodes_real[i]['qu_rate'],
-    #             sep='\t'))
-
-
-    time_laps =[]
-    mean_target = []
-    mean_target_s = []
-
-    for i in range(len(nodes_real)):
-        p_ai = []
-        p_as = []
-        p_us = []
-        p_ai.append(nodes_real[i]['AI_prob'])
-        p_as.append(nodes_real[i]['AS_prob'])
-        p_us.append(nodes_real[i]['US_prob'])
-        for time in range(1000):
-            factor = [1, 1, 1]
-            for j in range(100):
-                factor[0] = (1 - adjacency_matrix[i][j] * nodes_real[i]['A_prob'] * lambda_letter) * factor[0]
-                factor[1] = (1 - adjacency_matrix[i][j] * nodes_real[i]['AI_prob'] * 0.0) * factor[1]
-                factor[2] = (1 - adjacency_matrix[i][j] * nodes_real[i]['AI_prob'] * beta_array[betas]) * factor[2]
-
-            p_ai.append(p_ai[-1]*(1-mu) + p_us[-1] * ((1 - factor[0]) * (1 - factor[1]) + factor[0]* (1 - factor[2])) + p_as[-1] * (delta * (1 - factor[2]) + (1 - delta)*(1 - factor[1]) ))
-            p_as.append(p_ai[-1] * (1 - delta) * mu + p_us[-1] * (1 - factor[0])* factor[1] + p_as[-1] * (1 - delta) * factor[1])
-            p_us.append(p_ai[-1] * delta * mu + p_us[-1] * factor[0] * factor[2] + p_as[-1] * delta * factor[2])
-
-        mean_target.append(statistics.mean(p_ai))
-        # mean_target_s.append(statistics.mean(p_as))
-
-
-    from_beta_mean_target.append(statistics.mean(mean_target))
-
-
-
-
-print(from_beta_mean_target)
-
-plt.plot(beta_array, from_beta_mean_target)
-plt.xlabel('beta')
-plt.ylabel('Probability in Aware')
-
-plt.grid()
+plt.plot(beta_array, mean_values_array, color = 'red', linestyle = 'dotted')
+plt.grid(True)
 plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
